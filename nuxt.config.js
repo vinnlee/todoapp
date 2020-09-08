@@ -1,5 +1,3 @@
-import colors from 'vuetify/es5/util/colors'
-
 export default {
   /*
    ** Nuxt rendering mode
@@ -83,6 +81,7 @@ export default {
       appId: '1:908309350570:web:feb43bcb76fb312af368d3',
     },
     services: {
+      auth: true,
       messaging: true,
       firestore: true,
     },

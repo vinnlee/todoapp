@@ -1,73 +1,70 @@
 <template>
-  <v-layout column justify-center class="pt-10">
-    <h1 class="text-h2 text-center mb-8">Todo List</h1>
-    <v-card width="600" class="mx-auto px-4 py-4">
-      <v-text-field
-        v-model="name"
-        solo
-        flat
-        hide-details
-        label="What needs to be done?"
-        clearable
-        @keyup.enter="addTodo"
-      ></v-text-field>
-    </v-card>
-    <v-card width="600" class="mx-auto mt-5">
-      <v-list v-if="list.length" two-line flat>
+  <v-card v-if="$store.state.isAuth" flat>
+    <v-toolbar color="primary" dark extended flat tile>
+      <v-app-bar-nav-icon></v-app-bar-nav-icon>
+      <v-spacer></v-spacer>
+      <v-btn icon @click="signOut">
+        <v-icon>mdi-export</v-icon>
+      </v-btn>
+    </v-toolbar>
+    <v-card class="mx-auto pb-3" max-width="960" style="margin-top: -65px;">
+      <v-toolbar flat>
+        <v-toolbar-title>Todo List</v-toolbar-title>
+        <v-spacer></v-spacer>
+      </v-toolbar>
+      <v-divider></v-divider>
+      <v-card-actions class="px-1 pb-0">
+        <v-text-field
+          v-model="task"
+          solo
+          flat
+          hide-details
+          label="What needs to be done?"
+          clearable
+          @keyup.enter="addTodo"
+        ></v-text-field>
+      </v-card-actions>
+      <v-list v-if="todoItem" two-line flat class="pt-0">
         <v-subheader>Task</v-subheader>
-        <template v-for="todo in list">
+        <template v-for="todo in todoList">
           <todo-item :key="todo.id" :todo="todo"></todo-item>
         </template>
       </v-list>
-    </v-card>
-    <v-card v-if="list.length" width="600" class="mx-auto mt-5 pa-3">
-      <v-card-actions class="pa-0">
-        <span class="text-sm-body-2 mt-1">{{ itemLeft }} item lefts</span>
+      <v-card-actions v-if="todoItem" class="py-0 px-4">
+        <span class="text-sm-body-2 mt-1">{{ todoItemRemain }} item lefts</span>
         <v-spacer></v-spacer>
         <v-btn color="primary text-capitalize" @click="clearCompleted">
           Clear completed
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-layout>
+  </v-card>
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 import TodoItem from '@/components/TodoItem'
 
 export default {
+  middleware: 'auth',
   components: {
     TodoItem,
   },
-  data() {
-    return {
-      name: '',
-    }
-  },
+  data: () => ({
+    task: '',
+  }),
   computed: {
-    list() {
-      return this.$store.state.todos
-    },
-    itemLeft() {
-      return this.$store.state.todos.filter((todo) => !todo.done).length
-    },
+    ...mapGetters(['todoList', 'todoItem', 'todoItemRemain']),
   },
   methods: {
+    ...mapActions(['signOut']),
     addTodo(e) {
-      const newTodo = {
-        id: Date.now(),
-        name: this.name,
-        done: false,
-      }
-      this.$store.commit('add', newTodo)
-      this.name = ''
+      this.$store.dispatch('add', this.task)
+      this.task = ''
     },
     clearCompleted() {
-      this.$store.state.todos
-        .filter((todo) => todo.done)
-        .map((todo) => {
-          this.$store.commit('remove', todo)
-        })
+      const doneList = this.$store.state.todos.filter((todo) => todo.done)
+      this.$store.dispatch('clear', doneList)
     },
   },
 }

@@ -14,19 +14,19 @@
       <v-list-item-content>
         <template v-if="editTodo">
           <v-text-field
-            :value="todo.name"
+            :value="todo.task"
             flat
             hide-details
             autofocus
             class="edit-box"
-            @blur="edit"
-            @keyup.enter="edit"
+            @blur="edit($event, todo)"
+            @keyup.enter="edit($event, todo)"
           ></v-text-field>
         </template>
         <template v-else>
           <v-list-item-title
             :class="{ done: todo.done }"
-            v-text="todo.name"
+            v-text="todo.task"
           ></v-list-item-title>
         </template>
       </v-list-item-content>
@@ -62,23 +62,19 @@ export default {
       default: () => ({}),
     },
   },
-  data() {
-    return {
-      editTodo: false,
-    }
-  },
+  data: () => ({
+    editTodo: false,
+  }),
   methods: {
-    edit(e) {
-      const { value } = e.target
-      const { todo } = this
-      this.$store.commit('edit', { todo, name: value })
+    edit(e, todo) {
+      this.$store.dispatch('edit', { todo, taskTitle: e.target.value })
       this.editTodo = false
     },
     toggle(todo) {
-      this.$store.commit('toggle', todo)
+      this.$store.dispatch('toggle', todo)
     },
     remove(todo) {
-      this.$store.commit('remove', todo)
+      this.$store.dispatch('remove', todo)
     },
   },
 }
